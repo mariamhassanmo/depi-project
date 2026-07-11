@@ -17,7 +17,8 @@ app.secret_key = os.getenv("SECRET_KEY", "stockwise-secret-key-change-in-prod")
  
 
 
-CORS(app, supports_credentials=True, origins=["http://localhost:8080", "http://127.0.0.1:8080"])
+EXTRA_ORIGINS = [o.strip() for o in os.getenv("CORS_ORIGINS", "").split(",") if o.strip()]
+CORS(app, supports_credentials=True, origins=["http://localhost:8080", "http://127.0.0.1:8080", *EXTRA_ORIGINS])
  
 
 
@@ -30,7 +31,7 @@ app.register_blueprint(forecast_bp,  url_prefix="/api/forecast")
 
 @app.route("/api/health")
 def health():
-    return {"status": "iiiiiiiiiiiiiiiiiiiiiii"}
+    return {"status": "ok"}
 
 
 @app.route("/")

@@ -1,4 +1,4 @@
-const API = 'http://localhost:5000/api';
+const API = '/api';
 let currentPeriod = '90d';
 let demandChart = null;
 

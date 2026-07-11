@@ -1,5 +1,16 @@
 # Stockwise Flask API
 
+## Deploying on Railway
+
+1. Push this repo to GitHub and create a new Railway project from it (Railway auto-detects Python via the `Procfile`).
+2. In the service's **Variables** tab, set at minimum:
+   - `MONGO_URI` — your MongoDB connection string (e.g. from Atlas)
+   - `SECRET_KEY` — any random string, used to sign Flask sessions
+   - Optionally `STORE_X_USER` / `STORE_X_PASS` (and `_Y_`/`_Z_`) to override the default demo logins
+   - Optionally `CORS_ORIGINS` — comma-separated list of extra allowed origins, only needed if you serve the frontend from a different domain than the API
+3. Railway sets `PORT` automatically; the `Procfile` already binds gunicorn to it, so no extra config is needed there.
+4. Deploy. The app serves both the API (`/api/...`) and the frontend (`/`, `/login`, `/dashboard`) from the same Flask process, so no separate frontend deployment or CORS setup is required.
+
 ## Setup
 
 ```bash

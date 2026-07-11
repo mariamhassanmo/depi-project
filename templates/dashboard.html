@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dashboard — Stockwise</title>
-<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="/static/css/style.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 </head>
 <body class="dashboard-body">
@@ -177,7 +177,7 @@
 </div>
 
 <script>
-const API    = 'http://localhost:5000/api';
+const API    = '/api';
 const params = new URLSearchParams(location.search);
 const store  = params.get('store') || '';
 const names  = { x: 'Store X — California', y: 'Store Y — Texas', z: 'Store Z — Wisconsin' };
@@ -192,10 +192,10 @@ if (store && names[store]) {
   document.getElementById('dash-title').textContent     = `${names[store]} — Forecast Overview`;
   document.getElementById('fc-store-id').value = storeIds[store] || '';
 } else {
-  window.location.href = '../pages/index.html';
+  window.location.href = '/';
 }
 
-function goBack() { window.location.href = '../pages/index.html'; }
+function goBack() { window.location.href = '/'; }
 
 function setPeriod(period, btn) {
   document.querySelectorAll('.tf').forEach(b => b.classList.remove('active'));
@@ -412,10 +412,10 @@ async function loadAll() {
 async function init() {
   try {
     const res = await fetch(`${API}/auth/me`, { credentials: 'include' });
-    if (!res.ok) { window.location.href = `login.html?store=${store}`; return; }
+    if (!res.ok) { window.location.href = `/login?store=${store}`; return; }
     loadAll();
   } catch {
-    window.location.href = `login.html?store=${store}`;
+    window.location.href = `/login?store=${store}`;
   }
 }
 
