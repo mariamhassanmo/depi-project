@@ -30,6 +30,11 @@ app.register_blueprint(forecast_bp,  url_prefix="/api/forecast")
 @app.route("/api/health")
 def health():
     return {"status": "ok"}
+from flask import render_template
+
+@app.route("/")
+def home():
+    return render_template("index.html") # Make sure index.html is inside your templates/ folder
 
 if __name__ == "__main__":
     app.run(debug=True, port=8080,host="0.0.0.0")
