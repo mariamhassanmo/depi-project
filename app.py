@@ -37,5 +37,13 @@ def health():
 def home():
     return render_template("index.html") # Make sure index.html is inside your templates/ folder
 
+@app.route("/login")
+def login_page():
+    return render_template("login.html") # Make sure this matches your HTML file name!
+
+@app.route("/dashboard")
+def dashboard_page():
+    return render_template("dashboard.html") # Make sure this matches your HTML file name!
+
 if __name__ == "__main__":
     app.run(debug=True, port=8080,host="0.0.0.0")
