@@ -1,4 +1,5 @@
 from flask import Flask
+from flask import render_template
 from flask_cors import CORS
 from config.db import init_db
 from routes.dashboard import dashboard_bp
@@ -29,8 +30,8 @@ app.register_blueprint(forecast_bp,  url_prefix="/api/forecast")
 
 @app.route("/api/health")
 def health():
-    return {"status": "ok"}
-from flask import render_template
+    return {"status": "iiiiiiiiiiiiiiiiiiiiiii"}
+
 
 @app.route("/")
 def home():
