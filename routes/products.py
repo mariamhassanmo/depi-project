@@ -4,6 +4,22 @@ from config.db import get_db
 products_bp = Blueprint("products", __name__)
 
 
+@products_bp.route("/list-all")
+def list_all_products():
+    """
+    GET /api/products/list-all
+    Returns every product's item_id + product_name (minimal fields), for
+    populating a searchable dropdown on the frontend.
+    """
+    db   = get_db()
+    docs = list(
+        db.products
+          .find({}, {"_id": 0, "item_id": 1, "product_name": 1})
+          .sort("product_name", 1)
+    )
+    return jsonify(docs)
+
+
 @products_bp.route("/")
 def get_products():
     """

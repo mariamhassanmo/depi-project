@@ -111,11 +111,14 @@
     <div style="display:flex;gap:12px;align-items:flex-end;margin-bottom:16px;flex-wrap:wrap">
       <div class="form-group" style="margin:0;flex:1;min-width:160px">
         <label class="form-label">Item ID</label>
-        <input type="text" id="fc-item-id" class="form-input" placeholder="e.g. HOBBIES_1_001" style="padding-left:12px">
+        <input type="text" id="fc-item-id" class="form-input" list="fc-item-datalist" placeholder="Type or pick an item..." autocomplete="off" style="padding-left:12px">
+        <datalist id="fc-item-datalist"></datalist>
       </div>
       <div class="form-group" style="margin:0;flex:1;min-width:160px">
         <label class="form-label">Store ID</label>
-        <input type="text" id="fc-store-id" class="form-input" placeholder="e.g. CA_1" style="padding-left:12px">
+        <select id="fc-store-id" class="form-input" style="padding-left:12px">
+          <option value="">Loading stores...</option>
+        </select>
       </div>
       <div class="form-group" style="margin:0;min-width:120px">
         <label class="form-label">Horizon (days)</label>
@@ -183,14 +186,15 @@ const store  = params.get('store') || '';
 const names  = { x: 'Store X — California', y: 'Store Y — Texas', z: 'Store Z — Wisconsin' };
 const storeIds = { x: 'CA_1', y: 'TX_1', z: 'WI_1' };
 
-let currentPeriod = '90d';
-let demandChart   = null;
-let forecastChart = null;
+let currentPeriod   = '90d';
+let demandChart     = null;
+let forecastChart   = null;
+let defaultStoreId  = '';
 
 if (store && names[store]) {
   document.getElementById('nav-store-name').textContent = names[store];
   document.getElementById('dash-title').textContent     = `${names[store]} — Forecast Overview`;
-  document.getElementById('fc-store-id').value = storeIds[store] || '';
+  defaultStoreId = storeIds[store] || '';
 } else {
   window.location.href = '/';
 }
@@ -409,11 +413,55 @@ async function loadAll() {
   await Promise.all([loadSummary(), loadTrend(), loadTopProducts(), loadSkuTable()]);
 }
 
+function escapeHtml(str) {
+  return String(str ?? '').replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+
+async function loadItemDropdown() {
+  try {
+    const res   = await fetch(`${API}/products/list-all`, { credentials: 'include' });
+    const items = await res.json();
+    const dl    = document.getElementById('fc-item-datalist');
+    dl.innerHTML = (Array.isArray(items) ? items : []).map(p =>
+      `<option value="${escapeHtml(p.item_id)}">${escapeHtml(p.product_name || '')}</option>`
+    ).join('');
+  } catch (e) {
+    console.error('Failed to load item list', e);
+  }
+}
+
+async function loadStoreDropdown() {
+  const sel = document.getElementById('fc-store-id');
+  try {
+    const res    = await fetch(`${API}/sales/stores`, { credentials: 'include' });
+    const stores = await res.json();
+    if (!Array.isArray(stores) || !stores.length) throw new Error('No stores returned');
+
+    sel.innerHTML = stores.map(s => {
+      const id    = s.store_id || s.id || '';
+      const label = s.store_name ? `${id} — ${s.store_name}` : id;
+      return `<option value="${escapeHtml(id)}">${escapeHtml(label)}</option>`;
+    }).join('');
+
+    const hasDefault = stores.some(s => (s.store_id || s.id) === defaultStoreId);
+    sel.value = hasDefault ? defaultStoreId : (stores[0].store_id || stores[0].id || '');
+  } catch (e) {
+    console.error('Failed to load store list', e);
+    sel.innerHTML = defaultStoreId
+      ? `<option value="${escapeHtml(defaultStoreId)}">${escapeHtml(defaultStoreId)}</option>`
+      : `<option value="">No stores found</option>`;
+  }
+}
+
 async function init() {
   try {
     const res = await fetch(`${API}/auth/me`, { credentials: 'include' });
     if (!res.ok) { window.location.href = `/login?store=${store}`; return; }
     loadAll();
+    loadItemDropdown();
+    loadStoreDropdown();
   } catch {
     window.location.href = `/login?store=${store}`;
   }
