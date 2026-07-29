@@ -7,7 +7,6 @@ from routes.sales import sales_bp
 from routes.products import products_bp
 from routes.forecast import forecast_bp
 from dotenv import load_dotenv
-from routes.auth import auth_bp
 import os
  
 load_dotenv()
@@ -23,7 +22,6 @@ CORS(app, supports_credentials=True, origins=["http://localhost:8080", "http://1
 
 
 init_db(app)
-app.register_blueprint(auth_bp,      url_prefix="/api/auth")
 app.register_blueprint(dashboard_bp, url_prefix="/api/dashboard")
 app.register_blueprint(sales_bp,     url_prefix="/api/sales")
 app.register_blueprint(products_bp,  url_prefix="/api/products")
@@ -37,10 +35,6 @@ def health():
 @app.route("/")
 def home():
     return render_template("index.html") # Make sure index.html is inside your templates/ folder
-
-@app.route("/login")
-def login_page():
-    return render_template("login.html") # Make sure this matches your HTML file name!
 
 @app.route("/dashboard")
 def dashboard_page():

@@ -184,7 +184,9 @@ const API    = '/api';
 const params = new URLSearchParams(location.search);
 const store  = params.get('store') || '';
 const names  = { x: 'Store X — California', y: 'Store Y — Texas', z: 'Store Z — Wisconsin' };
-const storeIds = { x: 'CA_1', y: 'TX_1', z: 'WI_1' };
+const storeIds  = { x: 'CA_1', y: 'TX_1', z: 'WI_1' };
+const stateMap  = { x: 'CA',   y: 'TX',   z: 'WI'   };
+const currentState = stateMap[store] || '';
 
 let currentPeriod   = '90d';
 let demandChart     = null;
@@ -436,8 +438,12 @@ async function loadStoreDropdown() {
   const sel = document.getElementById('fc-store-id');
   try {
     const res    = await fetch(`${API}/sales/stores`, { credentials: 'include' });
-    const stores = await res.json();
-    if (!Array.isArray(stores) || !stores.length) throw new Error('No stores returned');
+    const all    = await res.json();
+    if (!Array.isArray(all) || !all.length) throw new Error('No stores returned');
+
+    const storeState = s => s.state_id || (s.store_id || s.id || '').split('_')[0];
+    let stores = currentState ? all.filter(s => storeState(s) === currentState) : all;
+    if (!stores.length) stores = all; // fallback if filtering matched nothing
 
     sel.innerHTML = stores.map(s => {
       const id    = s.store_id || s.id || '';
@@ -456,15 +462,9 @@ async function loadStoreDropdown() {
 }
 
 async function init() {
-  try {
-    const res = await fetch(`${API}/auth/me`, { credentials: 'include' });
-    if (!res.ok) { window.location.href = `/login?store=${store}`; return; }
-    loadAll();
-    loadItemDropdown();
-    loadStoreDropdown();
-  } catch {
-    window.location.href = `/login?store=${store}`;
-  }
+  loadAll();
+  loadItemDropdown();
+  loadStoreDropdown();
 }
 
 init();
